@@ -30,6 +30,14 @@ const nextConfig: NextConfig = {
       {
         protocol : "https",
         hostname : "www.boat-lifestyle.com",
+      },
+      {
+        protocol : "https",
+        hostname : "images.meesho.com"
+      },
+      {
+        protocol : "https",
+        hostname : "rukminim2.flixcart.com"
       }
     ],
   },

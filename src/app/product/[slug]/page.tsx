@@ -31,6 +31,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   return {
     title: seoTitle,
     description: seoDesc,
+    alternates: {
+      canonical: `https://goodproductshub.in/product/${product.slug}`,
+    },
     openGraph: {
       title: seoTitle,
       description: seoDesc,
@@ -74,7 +77,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": product.title,
-    "image": product.images.length > 0 ? product.images.map(img => img.url) : [primaryImage],
+    "image": product.images && product.images.length > 0 ? product.images.map(img => img?.url || "").filter(Boolean) : [primaryImage],
     "description": product.summary,
     "sku": product._id,
     "mpn": product.slug,

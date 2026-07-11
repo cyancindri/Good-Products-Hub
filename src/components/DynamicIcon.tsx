@@ -1,29 +1,7 @@
+"use client";
+
 import React from "react";
-import {
-  Laptop,
-  Coffee,
-  Dumbbell,
-  BookOpen,
-  Headphones,
-  Smartphone,
-  Tv,
-  Watch,
-  Gamepad,
-  Speaker,
-  Camera,
-  Mouse,
-  ShoppingBag,
-  Tag,
-  Utensils,
-  Activity,
-  Heart,
-  Sparkles,
-  Grid,
-  Home,
-  Flame,
-  ChefHat,
-  Bike,
-} from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 interface DynamicIconProps {
   name: string;
@@ -33,65 +11,41 @@ interface DynamicIconProps {
 export default function DynamicIcon({ name, className }: DynamicIconProps) {
   const iconName = name ? name.toLowerCase().trim() : "";
 
+  // 1. Check custom overrides / slug maps first
   switch (iconName) {
-    case "laptop":
     case "tech-gadgets":
-      return <Laptop className={className} />;
-    case "coffee":
+      return <LucideIcons.Laptop className={className} />;
     case "home-kitchen":
-      return <Coffee className={className} />;
-    case "dumbbell":
+      return <LucideIcons.Coffee className={className} />;
     case "fitness-wellness":
-      return <Dumbbell className={className} />;
-    case "bookopen":
-    case "book-open":
+      return <LucideIcons.Dumbbell className={className} />;
     case "books-reading":
-      return <BookOpen className={className} />;
-    case "headphones":
+      return <LucideIcons.BookOpen className={className} />;
     case "earbuds-accessories":
     case "headphones-earbuds-accessories":
-      return <Headphones className={className} />;
-    case "smartphone":
-      return <Smartphone className={className} />;
-    case "tv":
-      return <Tv className={className} />;
-    case "watch":
-      return <Watch className={className} />;
-    case "gamepad":
-      return <Gamepad className={className} />;
-    case "speaker":
-      return <Speaker className={className} />;
-    case "camera":
-      return <Camera className={className} />;
-    case "mouse":
-      return <Mouse className={className} />;
-    case "shoppingbag":
+      return <LucideIcons.Headphones className={className} />;
     case "shopping-bag":
-      return <ShoppingBag className={className} />;
-    case "tag":
-      return <Tag className={className} />;
-    case "utensils":
-      return <Utensils className={className} />;
-    case "activity":
-      return <Activity className={className} />;
-    case "heart":
-      return <Heart className={className} />;
-    case "sparkles":
-      return <Sparkles className={className} />;
-    case "grid":
+      return <LucideIcons.ShoppingBag className={className} />;
     case "all":
-      return <Grid className={className} />;
-    case "home":
-      return <Home className={className} />;
-    case "flame":
-      return <Flame className={className} />;
-    case "chefhat":
+      return <LucideIcons.Grid className={className} />;
+    case "trending":
+    case "trending-up":
+      return <LucideIcons.TrendingUp className={className} />;
     case "chef-hat":
-      return <ChefHat className={className} />;
-    case "bicycle":
-    case "bike":
-      return <Bike className={className} />;
-    default:
-      return <BookOpen className={className} />;
+      return <LucideIcons.ChefHat className={className} />;
   }
+
+  // 2. Dynamic lookup from lucide-react package case-insensitively
+  const cleanName = iconName.replace(/[^a-z0-9]/g, "");
+  const targetKey = Object.keys(LucideIcons).find(
+    (key) => key.toLowerCase() === cleanName
+  );
+
+  if (targetKey) {
+    const IconComponent = LucideIcons[targetKey as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>;
+    return <IconComponent className={className} />;
+  }
+
+  // 3. Fallback to BookOpen
+  return <LucideIcons.BookOpen className={className} />;
 }

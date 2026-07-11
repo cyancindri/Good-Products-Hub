@@ -24,6 +24,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: "Discover our complete catalog of curated, highly-rated tech gadgets, kitchen appliances, wellness products, and smart reads.",
       icon: "Laptop",
     };
+  } else if (resolvedParams.slug === "trending") {
+    category = {
+      _id: "trending",
+      name: "Trending Products",
+      slug: "trending",
+      description: "Explore our collection of highly-purchased, trending products recommended by editors.",
+      icon: "TrendingUp",
+    };
   } else {
     category = categories.find((c) => c.slug === resolvedParams.slug);
   }
@@ -37,6 +45,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${category.name} | Best Curated Selections & Reviews`,
     description: category.description,
+    alternates: {
+      canonical: `https://goodproductshub.in/category/${category.slug}`,
+    },
     openGraph: {
       title: `${category.name} | Best Curated Selections & Reviews`,
       description: category.description,
@@ -62,6 +73,15 @@ export default async function CategoryPage({ params }: PageProps) {
       icon: "Laptop",
     };
     products = await getProducts(undefined, false, false);
+  } else if (resolvedParams.slug === "trending") {
+    category = {
+      _id: "trending",
+      name: "Trending Products",
+      slug: "trending",
+      description: "Explore our collection of highly-purchased, trending products recommended by editors.",
+      icon: "TrendingUp",
+    };
+    products = await getProducts(undefined, true, false);
   } else {
     category = categories.find((c) => c.slug === resolvedParams.slug);
     if (!category) {

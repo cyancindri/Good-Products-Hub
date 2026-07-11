@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import type { Category } from "@/lib/sanity";
 import DynamicIcon from "@/components/DynamicIcon";
 
@@ -44,6 +44,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<Category[]>(fallbackCategories);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -120,9 +121,15 @@ export default function Navbar() {
                 placeholder="Search products or guides..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 pl-10 text-xs text-neutral-800 outline-none transition-all focus:border-brand-green focus:bg-white shadow-sm"
+                className="w-full rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2.5 pl-5 pr-24 text-xs text-neutral-800 outline-none transition-all focus:border-brand-green focus:bg-white shadow-sm"
               />
-              <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-neutral-400" />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 bg-brand-green hover:bg-brand-green-dark text-white px-3.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Search className="w-3 h-3 text-white" />
+                <span>Search</span>
+              </button>
             </form>
 
             {/* Actions: Mobile search and menu trigger */}
@@ -157,10 +164,16 @@ export default function Navbar() {
                 placeholder="Search products or guides..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 pl-10 text-sm text-neutral-800 outline-none focus:border-brand-green focus:bg-white"
+                className="w-full rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2.5 pl-5 pr-24 text-sm text-neutral-800 outline-none focus:border-brand-green focus:bg-white"
                 autoFocus
               />
-              <Search className="absolute left-3.5 top-3 w-4 h-4 text-neutral-400" />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 bg-brand-green hover:bg-brand-green-dark text-white px-3.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Search className="w-3 h-3 text-white" />
+                <span>Search</span>
+              </button>
             </form>
           </div>
         )}
@@ -240,7 +253,21 @@ export default function Navbar() {
             <span>All Products</span>
           </Link>
 
-          {categories.map((cat) => (
+          {/* Virtual Trending Products link in mobile menu too */}
+          <Link
+            href="/category/trending"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-2.5 rounded-xl px-4 py-3 text-base font-semibold transition-all group ${
+              pathname === "/category/trending"
+                ? "bg-brand-green-light text-brand-green font-bold"
+                : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
+            }`}
+          >
+            <DynamicIcon name="TrendingUp" className={pathname === "/category/trending" ? "w-4 h-4 text-brand-green" : "w-4 h-4 text-neutral-400 group-hover:text-brand-green transition-colors"} />
+            <span>Trending</span>
+          </Link>
+
+          {categories.slice(0, 4).map((cat) => (
             <Link
               key={cat._id}
               href={`/category/${cat.slug}`}
@@ -255,6 +282,41 @@ export default function Navbar() {
               <span>{cat.name}</span>
             </Link>
           ))}
+
+          {categories.length > 4 && (
+            <>
+              <button
+                onClick={() => setShowAllCategories(!showAllCategories)}
+                className="flex items-center justify-between w-full rounded-xl px-4 py-3 text-base font-semibold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <DynamicIcon name="Grid" className="w-4 h-4 text-neutral-400" />
+                  <span>{showAllCategories ? "See Less Categories" : "See All Categories"}</span>
+                </div>
+                {showAllCategories ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+              </button>
+
+              {showAllCategories && (
+                <div className="pl-4 space-y-1 mt-1 border-l-2 border-neutral-100 ml-6 animate-in slide-in-from-top duration-200">
+                  {categories.slice(4).map((cat) => (
+                    <Link
+                      key={cat._id}
+                      href={`/category/${cat.slug}`}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all group ${
+                        pathname === `/category/${cat.slug}`
+                          ? "bg-brand-green-light text-brand-green font-bold"
+                          : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-950"
+                      }`}
+                    >
+                      <DynamicIcon name={cat.icon} className={pathname === `/category/${cat.slug}` ? "w-3.5 h-3.5 text-brand-green" : "w-3.5 h-3.5 text-neutral-400 group-hover:text-brand-green transition-colors"} />
+                      <span>{cat.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
 
           <div className="pt-4 pb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 px-4">Guides</span>

@@ -1,7 +1,15 @@
 import React from "react";
 
 export function StudioPreview({ document }: { document: any }) {
-  const { displayed } = document;
+  if (!document) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 h-full text-neutral-500 font-sans">
+        <p className="text-sm font-semibold">Loading document preview...</p>
+      </div>
+    );
+  }
+
+  const displayed = document.displayed;
   
   if (!displayed || !displayed.slug || !displayed.slug.current) {
     return (

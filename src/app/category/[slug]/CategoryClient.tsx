@@ -86,7 +86,15 @@ export default function CategoryClient({
     icon: "Grid",
   };
 
-  const displayCategories = useMemo(() => [allProductsCategory, ...allCategories], [allCategories]);
+  const trendingCategory: Category = {
+    _id: "trending",
+    name: "Trending Products",
+    slug: "trending",
+    description: "Explore our collection of highly-purchased, trending products recommended by editors.",
+    icon: "TrendingUp",
+  };
+
+  const displayCategories = useMemo(() => [allProductsCategory, trendingCategory, ...allCategories], [allCategories]);
 
 
   return (
@@ -185,28 +193,28 @@ export default function CategoryClient({
         {/* Products Panel */}
         <div className="lg:col-span-3">
           {/* Controls Bar (Filter toggle for mobile + Sorting) */}
-          <div className="flex items-center justify-between border-b border-neutral-200/50 pb-4 mb-6 gap-4">
-            <span className="text-xs text-neutral-500 font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-neutral-200/50 pb-4 mb-6 gap-3">
+            <span className="text-xs text-neutral-500 font-medium text-center sm:text-left">
               Showing {processedProducts.length} of {initialProducts.length} products
             </span>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {/* Mobile Filter Button */}
               <button
                 onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                className="lg:hidden flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors"
+                className="lg:hidden flex items-center justify-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors flex-1 sm:flex-initial"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-brand-green" />
                 <span>Filters</span>
               </button>
 
               {/* Sort dropdown */}
-              <div className="flex items-center gap-1.5 relative bg-white border border-neutral-200 rounded-full px-4 py-2">
+              <div className="flex items-center justify-center gap-1.5 relative bg-white border border-neutral-200 rounded-full px-4 py-2 flex-1 sm:flex-initial">
                 <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400" />
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-neutral-700 outline-none cursor-pointer pr-1"
+                  className="bg-transparent text-xs font-bold text-neutral-700 outline-none cursor-pointer pr-1 w-full"
                 >
                   <option value="featured">Sort: Featured</option>
                   <option value="rating">Rating: High to Low</option>

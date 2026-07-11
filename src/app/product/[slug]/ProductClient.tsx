@@ -18,13 +18,69 @@ interface ProductClientProps {
 
 export default function ProductClient({ product, relatedProducts }: ProductClientProps) {
   const productImages = useMemo<ProductImage[]>(
-    () => product.images.length > 0 ? product.images : [{ url: "/logo.png", alt: product.title }],
+    () => product.images && product.images.length > 0 ? product.images : [{ url: "/logo.png", alt: product.title }],
     [product.images, product.title]
   );
   const [activeImage, setActiveImage] = useState<ProductImage>(productImages[0]);
   const [displayImage, setDisplayImage] = useState<ProductImage>(productImages[0]);
+
+  // Synchronize state when productImages updates dynamically in Sanity Studio preview
+  useEffect(() => {
+    if (productImages.length > 0) {
+      setActiveImage(productImages[0]);
+      setDisplayImage(productImages[0]);
+    }
+  }, [productImages]);
   const [isFading, setIsFading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0, pxX: 0, pxY: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    let pxX = e.clientX - left;
+    let pxY = e.clientY - top;
+
+    let renderedWidth = width;
+    let renderedHeight = height;
+    let renderedLeft = 0;
+    let renderedTop = 0;
+
+    if (naturalSize) {
+      const imageRatio = naturalSize.width / naturalSize.height;
+      const containerRatio = width / height;
+
+      if (imageRatio > containerRatio) {
+        renderedWidth = width;
+        renderedHeight = width / imageRatio;
+        renderedLeft = 0;
+        renderedTop = (height - renderedHeight) / 2;
+      } else {
+        renderedHeight = height;
+        renderedWidth = height * imageRatio;
+        renderedLeft = (width - renderedWidth) / 2;
+        renderedTop = 0;
+      }
+    }
+
+    // Clamp coordinates relative to the calculated visual image bounds
+    const minX = renderedLeft + 70;
+    const maxX = renderedLeft + renderedWidth - 70;
+    const minY = renderedTop + 70;
+    const maxY = renderedTop + renderedHeight - 70;
+
+    pxX = Math.max(minX, Math.min(pxX, maxX));
+    pxY = Math.max(minY, Math.min(pxY, maxY));
+
+    // Normalize coordinates mapping to align exactly with backgroundPosition percentages
+    const zoomRangeX = maxX - minX;
+    const zoomRangeY = maxY - minY;
+    const x = zoomRangeX > 0 ? ((pxX - minX) / zoomRangeX) * 100 : 50;
+    const y = zoomRangeY > 0 ? ((pxY - minY) / zoomRangeY) * 100 : 50;
+
+    setZoomPos({ x, y, pxX, pxY });
+  };
 
   // Instant scroll-to-top on mount to prevent any delayed restoration jumps
   useEffect(() => {
@@ -65,9 +121,9 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [productImages]);
 
-  // 3. Auto-scroll image gallery (cycles every 4s, resets on manual/arrow select)
+  // 3. Auto-scroll image gallery (cycles every 4s, resets on manual/arrow select, pauses on hover)
   useEffect(() => {
-    if (productImages.length <= 1) return;
+    if (productImages.length <= 1 || isHovered) return;
 
     const timer = setInterval(() => {
       setActiveImage((current) => {
@@ -78,7 +134,7 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
     }, 4000);
 
     return () => clearInterval(timer);
-  }, [activeImage, productImages]);
+  }, [activeImage, productImages, isHovered]);
 
   const formatPrice = (num: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -123,7 +179,12 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-12">
         {/* Left Column: Image Gallery (Matches height of details box) */}
         <div className="lg:col-span-5 flex flex-col justify-between gap-3 self-stretch">
-          <div className="relative aspect-[4/3] lg:aspect-auto lg:h-0 flex-1 w-full overflow-hidden bg-white rounded-3xl border border-neutral-200/40 card-shadow min-h-[320px] lg:min-h-0">
+          <div
+            className="relative aspect-[4/3] lg:aspect-auto lg:h-0 flex-1 w-full overflow-hidden bg-white rounded-3xl border border-neutral-200/40 card-shadow min-h-[320px] lg:min-h-0 lg:hover:cursor-none select-none"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             <Image
               src={displayImage.url}
               alt={displayImage.alt || product.title}
@@ -131,7 +192,22 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
               className={`object-contain transition-opacity duration-200 ease-in-out ${isFading ? "opacity-0" : "opacity-100"}`}
               sizes="(max-width: 1024px) 100vw, 500px"
               priority
+              onLoadingComplete={(img) => {
+                setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
+              }}
             />
+            {/* Viewport selection indicator box following cursor on desktop hover */}
+            {isHovered && (
+              <div
+                className="hidden lg:block absolute pointer-events-none border border-brand-green bg-brand-green/10 rounded-full"
+                style={{
+                  width: "140px",
+                  height: "140px",
+                  left: `${zoomPos.pxX - 70}px`,
+                  top: `${zoomPos.pxY - 70}px`,
+                }}
+              />
+            )}
           </div>
           
           {/* Thumbnails */}
@@ -159,7 +235,19 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
         </div>
 
         {/* Right Column: Key Details */}
-        <div className="lg:col-span-7 bg-white border border-neutral-200/40 rounded-3xl p-6 md:p-8 card-shadow flex flex-col justify-between self-stretch">
+        <div className="lg:col-span-7 bg-white border border-neutral-200/40 rounded-3xl p-6 md:p-8 card-shadow flex flex-col justify-between self-stretch relative">
+          {/* External Zoom Magnifier View (Renders on hover for desktop viewports) */}
+          {isHovered && (
+            <div
+              className="hidden lg:block absolute inset-0 bg-white rounded-3xl border border-neutral-200/40 card-shadow z-20 overflow-hidden"
+              style={{
+                backgroundImage: `url(${displayImage.url})`,
+                backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
+                backgroundSize: "320% 320%",
+                backgroundRepeat: "no-repeat"
+              }}
+            />
+          )}
           <div>
             {/* <div className="flex flex-wrap items-center justify-between gap-4">
               <span className="flex items-center gap-1 rounded-full bg-brand-green-light px-3 py-1 text-[10px] font-bold text-brand-green border border-brand-green/10">
@@ -232,7 +320,7 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
         </h2>
         <div className="bg-white border border-neutral-200/40 rounded-3xl p-6 md:p-8 card-shadow">
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {product.features.map((feat, i) => (
+            {(product.features || []).map((feat, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs text-neutral-600 leading-relaxed">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-green shrink-0 mt-2" />
                 <span>{feat}</span>

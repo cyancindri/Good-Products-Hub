@@ -16,6 +16,14 @@ interface BlogClientProps {
   otherBlogs: Blog[];
 }
 
+const generateSlug = (text: string): string => {
+  return (text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogClientProps) {
   const [activeHeading, setActiveHeading] = useState("");
   const [openFaqs, setOpenFaqs] = useState<{ [key: number]: boolean }>({});
@@ -30,7 +38,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
       blog.contentBlocks.forEach((block) => {
         if (block._type === "headingBlock" && block.text) {
           const text = block.text.trim();
-          const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const id = generateSlug(text);
           headingList.push({
             text,
             id,
@@ -38,7 +46,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
           });
         } else if (block._type === "productMentionBlock" && block.product?.title) {
           const text = block.product.title.trim();
-          const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const id = generateSlug(text);
           headingList.push({
             text,
             id,
@@ -56,7 +64,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
         if (line.startsWith("## ") || line.startsWith("### ")) {
           const isSub = line.startsWith("### ");
           const text = line.replace("### ", "").replace("## ", "").trim();
-          const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const id = generateSlug(text);
           headingList.push({
             text,
             id,
@@ -106,7 +114,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
         switch (block._type) {
           case "headingBlock": {
             const text = block.text || "";
-            const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const id = generateSlug(text);
             if (block.level === "h3") {
               return (
                 <h3 id={id} key={idx} className="font-display font-extrabold text-base md:text-lg text-neutral-800 mt-8 mb-3 scroll-mt-24">
@@ -131,7 +139,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
           case "productMentionBlock": {
             const product = block.product;
             if (!product) return null;
-            const headingId = product.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const headingId = generateSlug(product.title);
             return (
               <div key={idx} className="my-10 scroll-mt-24">
                 {/* 1. Heading (registered in Table of Contents) */}
@@ -151,7 +159,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
                   </span>
                   <div className="flex flex-col md:flex-row gap-5 items-center">
                     <div className="relative w-full md:w-40 aspect-[4/3] rounded-2xl overflow-hidden shrink-0 bg-white border border-neutral-100">
-                      <Image src={product.images[0]?.url || "/logo.png"} alt={product.images[0]?.alt || product.title} fill className="object-contain" />
+                      <Image src={product.images?.[0]?.url || "/logo.png"} alt={product.images?.[0]?.alt || product.title} fill className="object-contain" />
                     </div>
                     <div className="flex-1 flex flex-col justify-between self-stretch text-center md:text-left py-1">
                       <div>
@@ -194,10 +202,9 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
 
       let element: React.ReactNode = null;
 
-      // Check for headings
       if (trimmed.startsWith("## ")) {
         const text = trimmed.replace("## ", "");
-        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        const id = generateSlug(text);
         element = (
           <h2 id={id} key={idx} className="font-display font-extrabold text-xl md:text-2xl text-neutral-800 mt-10 mb-4 scroll-mt-24 border-b border-neutral-100 pb-2">
             {text}
@@ -205,7 +212,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
         );
       } else if (trimmed.startsWith("### ")) {
         const text = trimmed.replace("### ", "");
-        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        const id = generateSlug(text);
         element = (
           <h3 id={id} key={idx} className="font-display font-extrabold text-base md:text-lg text-neutral-800 mt-8 mb-3 scroll-mt-24">
             {text}
@@ -253,7 +260,7 @@ export default function BlogClient({ blog, relatedProducts, otherBlogs }: BlogCl
               </span>
               <div className="flex flex-col md:flex-row gap-5 items-center">
                 <div className="relative w-full md:w-40 aspect-[4/3] rounded-2xl overflow-hidden shrink-0 bg-white border border-neutral-100">
-                  <Image src={product.images[0]?.url || "/logo.png"} alt={product.images[0]?.alt || product.title} fill className="object-contain" />
+                  <Image src={product.images?.[0]?.url || "/logo.png"} alt={product.images?.[0]?.alt || product.title} fill className="object-contain" />
                 </div>
                 <div className="flex-1 flex flex-col justify-between self-stretch text-center md:text-left py-1">
                   <div>

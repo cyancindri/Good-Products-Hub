@@ -17,6 +17,7 @@ export interface Category {
   slug: string;
   description: string;
   icon: string;
+  order?: number;
 }
 
 export interface SEO {
@@ -486,7 +487,8 @@ const CATEGORY_FIELDS = /* groq */ `
   "name": coalesce(name, "Untitled category"),
   "slug": slug.current,
   "description": coalesce(description, ""),
-  "icon": coalesce(icon, "BookOpen")
+  "icon": coalesce(icon, "BookOpen"),
+  "order": coalesce(order, 0)
 `;
 
 const PRODUCT_FIELDS = /* groq */ `
@@ -579,7 +581,7 @@ const BLOG_FIELDS = /* groq */ `
   isApproved
 `;
 
-const CATEGORIES_QUERY = defineQuery(`*[_type == "category" && defined(slug.current)] | order(name asc){
+const CATEGORIES_QUERY = defineQuery(`*[_type == "category" && defined(slug.current)] | order(order asc, name asc){
   ${CATEGORY_FIELDS}
 }`);
 
@@ -593,8 +595,7 @@ const SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   defined(slug.current) &&
   (
     title match $search ||
-    summary match $search ||
-    features[] match $search
+    summary match $search
   )
 ] | order(isTrending desc, _updatedAt desc){
   ${PRODUCT_FIELDS}
@@ -607,8 +608,8 @@ const SEARCH_BLOGS_QUERY = defineQuery(`*[
   (
     title match $search ||
     excerpt match $search ||
-    excerpt match $search ||
-    content match $search
+    content match $search ||
+    contentBlocks[].text match $search
   )
 ] | order(_updatedAt desc){
   ${BLOG_FIELDS}
@@ -648,7 +649,8 @@ export async function getProducts(
     if (newArrivalOnly) {
       filter += ` && isNewArrival == true`;
     }
-    filter += `] | order(isTrending desc, _updatedAt desc){ ${PRODUCT_FIELDS} }`;
+    const orderClause = trendingOnly ? "isTrending desc, _updatedAt desc" : "_createdAt desc";
+    filter += `] | order(${orderClause}){ ${PRODUCT_FIELDS} }`;
 
     return await sanityClient.fetch<Product[]>(filter, { categorySlug });
   } catch (error) {
@@ -743,7 +745,7 @@ export async function searchStore(searchTerm: string): Promise<{ products: Produ
   } catch (error) {
     console.error("Failed to search Sanity database, returning local results:", error);
     const filteredProducts = mockProducts.filter(
-      (p) => p.title.toLowerCase().includes(query) || p.summary.toLowerCase().includes(query) || p.features.some(f => f.toLowerCase().includes(query))
+      (p) => p.title.toLowerCase().includes(query) || p.summary.toLowerCase().includes(query)
     );
     const filteredBlogs = mockBlogs.filter(
       (b) => b.title.toLowerCase().includes(query) || b.excerpt.toLowerCase().includes(query) || b.content.toLowerCase().includes(query)

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getCategories, getProducts, getBlogs } from "@/lib/sanity";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://goodproductshub.com";
+  const baseUrl = "https://goodproductshub.in";
 
   // Dynamic fetch
   const categories = await getCategories();

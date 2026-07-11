@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/admin/"],
+      disallow: ["/api/", "/studio/"],
     },
-    sitemap: "https://goodproductshub.com/sitemap.xml",
+    sitemap: "https://goodproductshub.in/sitemap.xml",
   };
 }

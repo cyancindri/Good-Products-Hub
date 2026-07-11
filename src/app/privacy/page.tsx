@@ -13,9 +13,6 @@ export default function PrivacyPage() {
             Your privacy is highly important to us. This Privacy Policy details the types of personal information collected and recorded by Good Products Hub and how we utilize it.
           </p>
           <p>
-            We collect basic log files, cookies, and email addresses when you subscribe to our newsletter. We do not sell or trade your personal details with third-party service providers.
-          </p>
-          <p>
             For any queries or comments regarding our privacy practices, please contact us directly.
           </p>
         </div>

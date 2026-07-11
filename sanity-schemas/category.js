@@ -24,6 +24,13 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'order',
+      title: 'Order',
+      type: 'number',
+      description: 'Used to sort categories on the website (lower numbers show first)',
+      initialValue: 0,
+    },
+    {
       name: 'description',
       title: 'Description',
       type: 'text',

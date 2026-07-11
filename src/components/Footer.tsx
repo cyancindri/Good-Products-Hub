@@ -1,28 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Check } from "lucide-react";
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail("");
-    }
-  };
-
   return (
     <footer className="mt-auto border-t border-neutral-200 bg-white pt-12 pb-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          {/* Brand Info */}
-          <div className="md:col-span-2 pr-4">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {/* Brand Info (Left Side - occupies 2 columns on desktop) */}
+          <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-1 group mb-4">
               <div className="relative h-11 w-11 shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
@@ -37,85 +25,73 @@ export default function Footer() {
                 Good Products <span className="text-brand-green">Hub</span>
               </span>
             </Link>
-            <p className="text-xs text-neutral-500 leading-relaxed max-w-sm">
+            <p className="text-xs text-neutral-500 leading-relaxed max-w-xl">
               We help you find the absolute best products on Indian e-commerce marketplaces. Our team conducts honest, meticulous comparisons, isolating pros, cons, and actual buyer sentiment to save your hard-earned money.
             </p>
-            <p className="mt-4 text-[10px] text-neutral-400 max-w-sm leading-relaxed">
-              <strong>Affiliate Disclosure:</strong> Good Products Hub is a participant in the Amazon Services LLC Associates Program and Flipkart Affiliate Program. When you purchase products through our links, we may earn a small referral commission at no additional cost to you.
-            </p>
           </div>
 
-          {/* Useful Links */}
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Discover</span>
-            <ul className="mt-4 space-y-2 text-xs font-medium text-neutral-600">
-              <li>
-                <Link href="/" className="hover:text-brand-green transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/tech-gadgets" className="hover:text-brand-green transition-colors">
-                  Tech & Gadgets
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/home-kitchen" className="hover:text-brand-green transition-colors">
-                  Home & Kitchen
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/fitness-wellness" className="hover:text-brand-green transition-colors">
-                  Fitness & Wellness
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/books-reading" className="hover:text-brand-green transition-colors">
-                  Books & Reading
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Newsletter signup */}
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Stay Updated</span>
-            <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
-              Get the latest buying guides, product comparisons, and affiliate discounts delivered straight to your inbox.
-            </p>
-            {subscribed ? (
-              <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-brand-green bg-brand-green-light border border-brand-green/20 rounded-full px-4 py-2">
-                <Check className="w-4 h-4 shrink-0" />
-                <span>Subscribed successfully!</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="mt-4 flex flex-col gap-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email..."
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs text-neutral-800 outline-none focus:border-brand-green focus:bg-white transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-orange-600 hover:bg-orange-700 text-white py-2 text-xs font-bold tracking-wide transition-colors shadow-sm shadow-orange-500/10"
-                >
-                  Join Newsletter
-                </button>
-              </form>
-            )}
+          {/* Social Media Links (Right Side - occupies 1 column on desktop) */}
+          <div className="flex flex-col md:items-start lg:items-start">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Connect With Us</span>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href="https://x.com/goodproductshub"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-white hover:bg-brand-green hover:border-brand-green transition-all shadow-sm cursor-pointer"
+                aria-label="Twitter / X"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+              <a
+                href="https://www.instagram.com/good_products_hub/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-white hover:bg-brand-green hover:border-brand-green transition-all shadow-sm cursor-pointer"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4 stroke-current fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+              </a>
+              <a
+                href="https://www.youtube.com/@GoodProductsHub"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-white hover:bg-brand-green hover:border-brand-green transition-all shadow-sm cursor-pointer"
+                aria-label="YouTube"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.53 3.545 12 3.545 12 3.545s-7.53 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.022 0 12 0 12s0 3.978.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.858.507 9.388.507 9.388.507s7.53 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.978 24 12 24 12s0-3.978-.502-5.837z" />
+                  <polygon fill="white" points="9.545 15.568 15.818 12 9.545 8.432" />
+                </svg>
+              </a>
+              <a
+                href="mailto:goodproductshub@gmail.com"
+                className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-white hover:bg-brand-green hover:border-brand-green transition-all shadow-sm cursor-pointer"
+                aria-label="Email"
+              >
+                <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
 
         <div className="mt-12 border-t border-neutral-200/60 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-xs text-neutral-400 font-sans">
-            &copy; {new Date().getFullYear()} Good Products Hub. All rights reserved. Made in India.
+          <span className="text-xs text-neutral-400 font-sans text-center md:text-left w-full md:w-auto">
+            &copy; {new Date().getFullYear()} Good Products Hub. <br className="lg:hidden" /> All rights reserved. Made in India.
           </span>
-          <div className="flex gap-4 text-xs text-neutral-400">
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 text-xs text-neutral-400 w-full md:w-auto">
             <Link href="/privacy" className="hover:text-neutral-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-neutral-600 transition-colors">Terms of Service</Link>
+            <Link href="/disclaimer" className="hover:text-neutral-600 transition-colors">Disclaimer</Link>
             <Link href="/about" className="hover:text-neutral-600 transition-colors">About Us</Link>
           </div>
         </div>

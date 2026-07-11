@@ -6,7 +6,7 @@ interface ProsConsProps {
   cons: string[];
 }
 
-export default function ProsCons({ pros, cons }: ProsConsProps) {
+export default function ProsCons({ pros = [], cons = [] }: ProsConsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
       {/* Pros */}

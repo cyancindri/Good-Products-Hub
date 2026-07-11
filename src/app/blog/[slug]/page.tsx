@@ -11,6 +11,18 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+const parseDateSafely = (dateStr: string): string => {
+  try {
+    if (dateStr) {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString();
+      }
+    }
+  } catch {}
+  return new Date().toISOString();
+};
+
 // 1. Dynamic SEO Metadata Generation
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
@@ -31,6 +43,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   return {
     title: seoTitle,
     description: seoDesc,
+    alternates: {
+      canonical: `https://goodproductshub.in/blog/${blog.slug}`,
+    },
     openGraph: {
       title: seoTitle,
       description: seoDesc,
@@ -43,7 +58,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         },
       ],
       type: "article",
-      publishedTime: new Date(blog.date).toISOString(),
+      publishedTime: parseDateSafely(blog.date),
       authors: [blog.author],
     },
     twitter: {
@@ -81,7 +96,7 @@ export default async function BlogDetailPage({ params, searchParams }: PageProps
     "@type": "BlogPosting",
     "headline": blog.title,
     "image": [coverUrl],
-    "datePublished": new Date(blog.date).toISOString(),
+    "datePublished": parseDateSafely(blog.date),
     "dateModified": new Date().toISOString(),
     "author": [
       {

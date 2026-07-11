@@ -17,16 +17,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Good Products Hub | Smart Affiliate Shopping & Buying Guides",
+  title: "Good Products Hub | Save Your Money",
   description: "Discover curated, highly-rated products, detailed buying guides, and honest expert reviews to save your money and shop smarter.",
-  metadataBase: new URL("https://goodproductshub.com"),
+  metadataBase: new URL("https://goodproductshub.in"),
   keywords: ["buying guides", "product reviews", "marketplaces", "best products", "affiliate deals"],
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",
   },
+  alternates: {
+    canonical: "https://goodproductshub.in",
+  },
   openGraph: {
-    title: "Good Products Hub | Smart Affiliate Shopping & Buying Guides",
+    title: "Good Products Hub | Save Your Money",
     description: "Discover curated, highly-rated products, detailed buying guides, and honest expert reviews to save your money.",
     type: "website",
     locale: "en_IN",
@@ -34,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Good Products Hub | Smart Affiliate Shopping & Buying Guides",
+    title: "Good Products Hub | Save Your Money",
     description: "Discover curated, highly-rated products, detailed buying guides, and honest expert reviews to save your money.",
   }
 };
