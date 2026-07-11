@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     title: "Good Products Hub | Save Your Money",
     description: "Discover curated, highly-rated products, detailed buying guides, and honest expert reviews to save your money.",
   },
-  verification: {
-    google: "ca-pub-6019707348267112",
+  other: {
+    "google-adsense-account": "ca-pub-6019707348267112",
   },
 };
 
