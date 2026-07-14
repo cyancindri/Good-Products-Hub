@@ -728,6 +728,114 @@ export async function getRelatedProducts(productSlugs: string[]): Promise<Produc
   return mockProducts.filter((p) => productSlugs.includes(p.slug));
 }
 
+function isValidSearchMatch(text: string, query: string): boolean {
+  const lowerText = text.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+
+  if (!lowerText.includes(lowerQuery)) return false;
+
+  // Handle specific common query keywords with known false-positive matches
+  if (lowerQuery === "mac") {
+    // Make sure "mac" is not matched only inside "machine", "machinery", "macro", "macerate", "macaroni"
+    let index = lowerText.indexOf("mac");
+    while (index !== -1) {
+      let start = index;
+      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+        start--;
+      }
+      let end = index + 3;
+      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+        end++;
+      }
+      const fullWord = lowerText.slice(start, end);
+      if (
+        fullWord !== "machine" &&
+        fullWord !== "machinery" &&
+        fullWord !== "machines" &&
+        fullWord !== "machined" &&
+        fullWord !== "macaroni" &&
+        !fullWord.startsWith("macro") &&
+        !fullWord.startsWith("macerat")
+      ) {
+        return true;
+      }
+      index = lowerText.indexOf("mac", index + 1);
+    }
+    return false;
+  }
+
+  if (lowerQuery === "air") {
+    // Make sure "air" is not matched only inside "chair", "hair", "dairy", "fair"
+    let index = lowerText.indexOf("air");
+    while (index !== -1) {
+      let start = index;
+      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+        start--;
+      }
+      let end = index + 3;
+      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+        end++;
+      }
+      const fullWord = lowerText.slice(start, end);
+      if (
+        !fullWord.includes("chair") &&
+        !fullWord.includes("hair") &&
+        !fullWord.includes("dairy") &&
+        !fullWord.includes("fair")
+      ) {
+        return true;
+      }
+      index = lowerText.indexOf("air", index + 1);
+    }
+    return false;
+  }
+
+  if (lowerQuery === "pro") {
+    // Make sure "pro" is not matched only inside "product", "process", "protection", "professional", etc.
+    let index = lowerText.indexOf("pro");
+    while (index !== -1) {
+      let start = index;
+      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+        start--;
+      }
+      let end = index + 3;
+      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+        end++;
+      }
+      const fullWord = lowerText.slice(start, end);
+      if (
+        !fullWord.startsWith("product") &&
+        !fullWord.startsWith("process") &&
+        !fullWord.startsWith("protect") &&
+        !fullWord.startsWith("program") &&
+        !fullWord.startsWith("progress") &&
+        !fullWord.startsWith("promot") &&
+        !fullWord.startsWith("provid") &&
+        fullWord !== "profile" &&
+        fullWord !== "profiles" &&
+        fullWord !== "promise" &&
+        fullWord !== "promised" &&
+        fullWord !== "promising" &&
+        fullWord !== "prompt" &&
+        fullWord !== "prompts" &&
+        fullWord !== "proof" &&
+        fullWord !== "proofs" &&
+        fullWord !== "proper" &&
+        fullWord !== "property" &&
+        fullWord !== "properties" &&
+        fullWord !== "professional" &&
+        fullWord !== "professionals"
+      ) {
+        return true;
+      }
+      index = lowerText.indexOf("pro", index + 1);
+    }
+    return false;
+  }
+
+  return true;
+}
+
 export async function searchStore(searchTerm: string): Promise<{ products: Product[]; blogs: Blog[] }> {
   const query = searchTerm.trim().toLowerCase();
   const search = `*${query}*`;
@@ -738,17 +846,25 @@ export async function searchStore(searchTerm: string): Promise<{ products: Produ
       sanityClient.fetch<Blog[]>(SEARCH_BLOGS_QUERY, { search })
     ]);
     
+    const filteredProducts = pData.filter((p) => 
+      isValidSearchMatch(p.title + " " + p.summary, query)
+    );
+
+    const filteredBlogs = bData.filter((b) => 
+      isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content, query)
+    );
+
     return {
-      products: pData,
-      blogs: bData,
+      products: filteredProducts,
+      blogs: filteredBlogs,
     };
   } catch (error) {
     console.error("Failed to search Sanity database, returning local results:", error);
     const filteredProducts = mockProducts.filter(
-      (p) => p.title.toLowerCase().includes(query) || p.summary.toLowerCase().includes(query)
+      (p) => isValidSearchMatch(p.title + " " + p.summary, query)
     );
     const filteredBlogs = mockBlogs.filter(
-      (b) => b.title.toLowerCase().includes(query) || b.excerpt.toLowerCase().includes(query) || b.content.toLowerCase().includes(query)
+      (b) => isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content, query)
     );
     return { products: filteredProducts, blogs: filteredBlogs };
   }
