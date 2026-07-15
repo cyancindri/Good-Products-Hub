@@ -589,31 +589,7 @@ const RELATED_PRODUCTS_QUERY = defineQuery(`*[_type == "product" && slug.current
   ${PRODUCT_FIELDS}
 }`);
 
-const SEARCH_PRODUCTS_QUERY = defineQuery(`*[
-  _type == "product" &&
-  isApproved == true &&
-  defined(slug.current) &&
-  (
-    title match $search ||
-    summary match $search
-  )
-] | order(isTrending desc, _updatedAt desc){
-  ${PRODUCT_FIELDS}
-}`);
 
-const SEARCH_BLOGS_QUERY = defineQuery(`*[
-  _type == "blog" &&
-  isApproved == true &&
-  defined(slug.current) &&
-  (
-    title match $search ||
-    excerpt match $search ||
-    content match $search ||
-    contentBlocks[].text match $search
-  )
-] | order(_updatedAt desc){
-  ${BLOG_FIELDS}
-}`);
 
 // ==========================================
 // EXPORTED DATA FETCHING CLIENT FUNCTIONS
@@ -730,107 +706,134 @@ export async function getRelatedProducts(productSlugs: string[]): Promise<Produc
 
 function isValidSearchMatch(text: string, query: string): boolean {
   const lowerText = text.toLowerCase();
-  const lowerQuery = query.toLowerCase();
+  const keywords = query.toLowerCase().split(/\s+/).filter(Boolean);
 
-  if (!lowerText.includes(lowerQuery)) return false;
+  if (keywords.length === 0) return false;
 
-  // Handle specific common query keywords with known false-positive matches
-  if (lowerQuery === "mac") {
-    // Make sure "mac" is not matched only inside "machine", "machinery", "macro", "macerate", "macaroni"
-    let index = lowerText.indexOf("mac");
-    while (index !== -1) {
-      let start = index;
-      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
-        start--;
+  // EVERY keyword must be a valid match
+  for (const kw of keywords) {
+    if (!lowerText.includes(kw)) return false;
+
+    if (kw === "mac") {
+      let index = lowerText.indexOf("mac");
+      let foundValid = false;
+      while (index !== -1) {
+        let start = index;
+        while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+          start--;
+        }
+        let end = index + 3;
+        while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+          end++;
+        }
+        const fullWord = lowerText.slice(start, end);
+        // Valid Apple Mac words
+        if (
+          fullWord === "mac" ||
+          fullWord === "macs" ||
+          fullWord.startsWith("macbook") ||
+          fullWord.startsWith("mac-book") ||
+          fullWord === "imac" ||
+          fullWord === "imacs" ||
+          fullWord === "macintosh" ||
+          fullWord === "macos" ||
+          fullWord.startsWith("macmini") ||
+          fullWord.startsWith("mac-mini") ||
+          fullWord.startsWith("macpro") ||
+          fullWord.startsWith("mac-pro") ||
+          fullWord.startsWith("macstudio") ||
+          fullWord.startsWith("mac-studio")
+        ) {
+          foundValid = true;
+          break;
+        }
+        index = lowerText.indexOf("mac", index + 1);
       }
-      let end = index + 3;
-      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
-        end++;
+      if (!foundValid) return false;
+    } else if (kw === "car") {
+      let index = lowerText.indexOf("car");
+      let foundValid = false;
+      while (index !== -1) {
+        let start = index;
+        while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+          start--;
+        }
+        let end = index + 3;
+        while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+          end++;
+        }
+        const fullWord = lowerText.slice(start, end);
+        // Valid Vehicle car words
+        if (
+          fullWord === "car" ||
+          fullWord === "cars" ||
+          fullWord.startsWith("carwash") ||
+          fullWord.startsWith("car-wash") ||
+          fullWord.endsWith("car") ||
+          fullWord.endsWith("cars")
+        ) {
+          foundValid = true;
+          break;
+        }
+        index = lowerText.indexOf("car", index + 1);
       }
-      const fullWord = lowerText.slice(start, end);
-      if (
-        fullWord !== "machine" &&
-        fullWord !== "machinery" &&
-        fullWord !== "machines" &&
-        fullWord !== "machined" &&
-        fullWord !== "macaroni" &&
-        !fullWord.startsWith("macro") &&
-        !fullWord.startsWith("macerat")
-      ) {
-        return true;
+      if (!foundValid) return false;
+    } else if (kw === "air") {
+      let index = lowerText.indexOf("air");
+      let foundValid = false;
+      while (index !== -1) {
+        let start = index;
+        while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+          start--;
+        }
+        let end = index + 3;
+        while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+          end++;
+        }
+        const fullWord = lowerText.slice(start, end);
+        // Valid air words (exclude chair, hair, dairy, fair, repair, stair, affair)
+        if (
+          !fullWord.includes("chair") &&
+          !fullWord.includes("hair") &&
+          !fullWord.includes("dairy") &&
+          !fullWord.includes("fair") &&
+          !fullWord.includes("repair") &&
+          !fullWord.includes("stair") &&
+          !fullWord.includes("affair")
+        ) {
+          foundValid = true;
+          break;
+        }
+        index = lowerText.indexOf("air", index + 1);
       }
-      index = lowerText.indexOf("mac", index + 1);
+      if (!foundValid) return false;
+    } else if (kw === "pro") {
+      let index = lowerText.indexOf("pro");
+      let foundValid = false;
+      while (index !== -1) {
+        let start = index;
+        while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
+          start--;
+        }
+        let end = index + 3;
+        while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
+          end++;
+        }
+        const fullWord = lowerText.slice(start, end);
+        // Valid Pro words
+        if (
+          fullWord === "pro" ||
+          fullWord === "pros" ||
+          fullWord.endsWith("pro") ||
+          fullWord.startsWith("pro-")
+        ) {
+          foundValid = true;
+          break;
+        }
+        index = lowerText.indexOf("pro", index + 1);
+      }
+      if (!foundValid) return false;
     }
-    return false;
-  }
-
-  if (lowerQuery === "air") {
-    // Make sure "air" is not matched only inside "chair", "hair", "dairy", "fair"
-    let index = lowerText.indexOf("air");
-    while (index !== -1) {
-      let start = index;
-      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
-        start--;
-      }
-      let end = index + 3;
-      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
-        end++;
-      }
-      const fullWord = lowerText.slice(start, end);
-      if (
-        !fullWord.includes("chair") &&
-        !fullWord.includes("hair") &&
-        !fullWord.includes("dairy") &&
-        !fullWord.includes("fair")
-      ) {
-        return true;
-      }
-      index = lowerText.indexOf("air", index + 1);
-    }
-    return false;
-  }
-
-  if (lowerQuery === "pro") {
-    // Make sure "pro" is not matched only inside "product", "process", "protection", "professional", etc.
-    let index = lowerText.indexOf("pro");
-    while (index !== -1) {
-      let start = index;
-      while (start > 0 && /[a-z0-9]/i.test(lowerText[start - 1])) {
-        start--;
-      }
-      let end = index + 3;
-      while (end < lowerText.length && /[a-z0-9]/i.test(lowerText[end])) {
-        end++;
-      }
-      const fullWord = lowerText.slice(start, end);
-      if (
-        !fullWord.startsWith("product") &&
-        !fullWord.startsWith("process") &&
-        !fullWord.startsWith("protect") &&
-        !fullWord.startsWith("program") &&
-        !fullWord.startsWith("progress") &&
-        !fullWord.startsWith("promot") &&
-        !fullWord.startsWith("provid") &&
-        fullWord !== "profile" &&
-        fullWord !== "profiles" &&
-        fullWord !== "promise" &&
-        fullWord !== "promised" &&
-        fullWord !== "promising" &&
-        fullWord !== "prompt" &&
-        fullWord !== "prompts" &&
-        fullWord !== "proof" &&
-        fullWord !== "proofs" &&
-        fullWord !== "proper" &&
-        fullWord !== "property" &&
-        fullWord !== "properties" &&
-        fullWord !== "professional" &&
-        fullWord !== "professionals"
-      ) {
-        return true;
-      }
-      index = lowerText.indexOf("pro", index + 1);
-    }
-    return false;
   }
 
   return true;
@@ -838,20 +841,62 @@ function isValidSearchMatch(text: string, query: string): boolean {
 
 export async function searchStore(searchTerm: string): Promise<{ products: Product[]; blogs: Blog[] }> {
   const query = searchTerm.trim().toLowerCase();
-  const search = `*${query}*`;
+  
+  if (!query) {
+    return { products: [], blogs: [] };
+  }
+
+  const keywords = query.split(/\s+/).filter(Boolean);
+  if (keywords.length === 0) {
+    return { products: [], blogs: [] };
+  }
 
   try {
+    // 1. Build dynamic GROQ product filter (each keyword must match title OR summary OR category name/slug)
+    const productFilter = keywords
+      .map((_, i) => `(title match $kw${i} || summary match $kw${i} || category->name match $kw${i} || category->slug.current match $kw${i})`)
+      .join(" && ");
+
+    // 2. Build dynamic GROQ blog filter (each keyword must match title OR excerpt OR content OR blocks OR category name/slug)
+    const blogFilter = keywords
+      .map((_, i) => `(title match $kw${i} || excerpt match $kw${i} || content match $kw${i} || contentBlocks[].text match $kw${i} || category->name match $kw${i} || category->slug.current match $kw${i})`)
+      .join(" && ");
+
+    const dynamicProductQuery = `*[
+      _type == "product" &&
+      isApproved == true &&
+      defined(slug.current) &&
+      (${productFilter})
+    ] | order(isTrending desc, _updatedAt desc){
+      ${PRODUCT_FIELDS}
+    }`;
+
+    const dynamicBlogQuery = `*[
+      _type == "blog" &&
+      isApproved == true &&
+      defined(slug.current) &&
+      (${blogFilter})
+    ] | order(_updatedAt desc){
+      ${BLOG_FIELDS}
+    }`;
+
+    // 3. Populate dynamic query parameters with wildcard matching
+    const params: Record<string, string> = {};
+    keywords.forEach((kw, i) => {
+      params[`kw${i}`] = `${kw}*`;
+    });
+
     const [pData, bData] = await Promise.all([
-      sanityClient.fetch<Product[]>(SEARCH_PRODUCTS_QUERY, { search }),
-      sanityClient.fetch<Blog[]>(SEARCH_BLOGS_QUERY, { search })
+      sanityClient.fetch<Product[]>(dynamicProductQuery, params),
+      sanityClient.fetch<Blog[]>(dynamicBlogQuery, params)
     ]);
     
     const filteredProducts = pData.filter((p) => 
-      isValidSearchMatch(p.title + " " + p.summary, query)
+      isValidSearchMatch(p.title + " " + p.summary + " " + (p.categoryName || ""), query)
     );
 
     const filteredBlogs = bData.filter((b) => 
-      isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content, query)
+      isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content + " " + (b.categoryName || ""), query)
     );
 
     return {
@@ -861,10 +906,10 @@ export async function searchStore(searchTerm: string): Promise<{ products: Produ
   } catch (error) {
     console.error("Failed to search Sanity database, returning local results:", error);
     const filteredProducts = mockProducts.filter(
-      (p) => isValidSearchMatch(p.title + " " + p.summary, query)
+      (p) => isValidSearchMatch(p.title + " " + p.summary + " " + (p.categoryName || ""), query)
     );
     const filteredBlogs = mockBlogs.filter(
-      (b) => isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content, query)
+      (b) => isValidSearchMatch(b.title + " " + b.excerpt + " " + b.content + " " + (b.categoryName || ""), query)
     );
     return { products: filteredProducts, blogs: filteredBlogs };
   }

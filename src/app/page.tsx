@@ -96,7 +96,7 @@ export default async function Home({ searchParams }: PageProps) {
                 Showing results for &ldquo;<span className="text-brand-green">{searchQuery}</span>&rdquo;
               </h1>
               <p className="text-xs text-neutral-500 mt-2">
-                We found {searchResults.products.length} products and {searchResults.blogs.length} articles matching your criteria.
+                We found <span className="font-bold text-orange-500">{searchResults.products.length} products</span> and <span className="font-bold text-orange-500">{searchResults.blogs.length} articles</span> matching your criteria.
               </p>
             </div>
 
